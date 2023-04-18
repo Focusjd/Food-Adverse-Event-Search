@@ -9,20 +9,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food Adverse Events</title>
     <!-- <link rel="stylesheet" href="{% static 'css/style.css' %}"> -->
+    <script>
+        function clearSearch() {
+            const form = document.querySelector('form');
+            form.reset();
+
+            const table = document.querySelector('tbody');
+            table.innerHTML = '';
+        }
+    </script>
 </head>
 
 <body>
-    <h1>Food Adverse Events</h1>
+    <h1>Food Adverse Events Search</h1>
     <form method="get" action="">
         {{ form.as_p }}
         <button type="submit">Search</button>
+        <button type="button" onclick="clearSearch()">Clear</button>
     </form>
 
 
-    <table>
-        <!-- (Include the same table structure from the previous index.html) -->
-        
-       
+    <table> 
             <thead>
                 <tr>
                     <th>Report Number</th>
@@ -61,11 +68,9 @@
                     </tr>
                 {% endfor %}
             </tbody>
-        
-
-
-        
     </table>
+
+    
 </body>
 
 </html>
