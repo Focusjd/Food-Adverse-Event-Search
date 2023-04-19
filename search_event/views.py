@@ -25,11 +25,106 @@ from collections import defaultdict
 import pandas as pd
 from datetime import datetime
 
-
+from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+from plotly.offline import plot
+
+
 # url:f"https://api.fda.gov/food/event.json?search=reactions:{reactions}+AND+consumer.gender:{gender}+AND+consumer.age:{age}+AND+products.name_brand:{brand}.&limit=10"
 
 CACHE_FILE = 'search_cache.json'
+
+
+def build_tree_structure():
+    tree = []
+
+    products = Product.objects.all()
+    for product in products:
+        industry_code = product.industry_code
+        industry_name = product.industry_name
+        role = product.role
+
+        tree.append({
+            'id': f'{industry_code}-{role}-{product.id}',
+            'parent': f'{industry_code}-{role}' if role else industry_code,
+            'label': product.name_brand
+        })
+
+        if f'{industry_code}-{role}' not in [item['id'] for item in tree]:
+            tree.append({
+                'id': f'{industry_code}-{role}',
+                'parent': industry_code,
+                'label': role
+            })
+
+        if industry_code not in [item['id'] for item in tree]:
+            tree.append({
+                'id': industry_code,
+                'parent': '',
+                'label': f'{industry_code} - {industry_name}'
+            })
+
+    return tree
+
+
+def tree_structure_plotly_view(request):
+    tree_structure = build_tree_structure()
+
+    fig = make_subplots(1, 1, specs=[[{'type': 'sunburst'}]])
+
+    fig.add_trace(go.Sunburst(
+        ids=[item['id'] for item in tree_structure],
+        labels=[item['label'] for item in tree_structure],
+        parents=[item['parent'] for item in tree_structure],
+        hovertext=[item['label'] for item in tree_structure],
+        hoverinfo="text",
+        insidetextorientation='radial'
+    ))
+
+    fig.update_layout(title_text='Tree Structure of Products', title_x=0.5, height=1000, width=1000)
+
+    plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+
+    context = {
+        'plot_div': plot_div,
+    }
+
+    return render(request, 'tree_structure_plotly.html', context)
+
+
+def build_tree_list():
+    tree = {}
+
+    products = Product.objects.all()
+    for product in products:
+        industry_code = product.industry_code
+        industry_name = product.industry_name
+
+        if industry_code not in tree:
+            tree[industry_code] = {
+                'name': industry_name,
+                'roles': {}
+            }
+
+        role = product.role
+        if role not in tree[industry_code]['roles']:
+            tree[industry_code]['roles'][role] = []
+
+        tree[industry_code]['roles'][role].append({
+            'id': product.id,
+            'name_brand': product.name_brand
+        })
+
+    return tree
+
+
+def tree_structure_view(request):
+    tree_structure = build_tree_list()
+    context = {
+        'tree_structure': tree_structure,
+    }
+    return render(request, 'tree_structure.html', context)
+
 
 
 def line_charts(request):
@@ -177,7 +272,7 @@ def load_from_cache(query):
 
 
 def search_api(query, timeout=2):
-    api_url = f'https://api.fda.gov/food/event.json?sort=date_started:desc&search={query}&limit=10'
+    api_url = f'https://api.fda.gov/food/event.json?sort=date_started:desc&search={query}&limit=15'
     try:
         response = requests.get(api_url, timeout=timeout)
         if response.status_code == 200:
