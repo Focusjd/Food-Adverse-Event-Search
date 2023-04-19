@@ -9,10 +9,66 @@ import hashlib
 import os
 import threading
 
+from collections import defaultdict
+from datetime import datetime
 
+import plotly.express as px
+import plotly.io as pio
+
+
+from django.shortcuts import render
+from django.db.models import Count
+import plotly.express as px
+import plotly.io as pio
+from .models import FoodAdverseEvent
+from collections import defaultdict
+import pandas as pd
+from datetime import datetime
+
+
+import plotly.graph_objects as go
 # url:f"https://api.fda.gov/food/event.json?search=reactions:{reactions}+AND+consumer.gender:{gender}+AND+consumer.age:{age}+AND+products.name_brand:{brand}.&limit=10"
 
 CACHE_FILE = 'search_cache.json'
+
+
+def line_charts(request):
+    # Get data from the database
+    events = FoodAdverseEvent.objects.all()
+
+    # Process data to extract information for the charts
+    data = defaultdict(lambda: defaultdict(int))
+
+    for event in events:
+        date_str = event.date_created
+        date = datetime.strptime(date_str, '%Y%m%d')  # Updated format string
+        data['year'][date.year] += 1
+        data['month'][date.replace(day=1)] += 1
+        data['day'][date] += 1
+
+    # Convert dictionaries to DataFrames
+    df_year = pd.DataFrame(list(data['year'].items()), columns=['year', 'count']).sort_values('year')
+    df_month = pd.DataFrame(list(data['month'].items()), columns=['month', 'count']).sort_values('month')
+    df_day = pd.DataFrame(list(data['day'].items()), columns=['day', 'count']).sort_values('day')
+
+    # Create Plotly figures
+    fig_year = px.line(df_year, x='year', y='count', title='Adverse event reports by year')
+    fig_month = px.line(df_month, x='month', y='count', title='Adverse event reports by month')
+    fig_day = px.line(df_day, x='day', y='count', title='Adverse event reports by day')
+
+    # Convert the figures to HTML
+    year_chart_html = pio.to_html(fig_year, full_html=False)
+    month_chart_html = pio.to_html(fig_month, full_html=False)
+    day_chart_html = pio.to_html(fig_day, full_html=False)
+
+    context = {
+        'year_chart': year_chart_html,
+        'month_chart': month_chart_html,
+        'day_chart': day_chart_html,
+    }
+
+    return render(request, 'line_charts.html', context)
+
 
 
 def results(request):
