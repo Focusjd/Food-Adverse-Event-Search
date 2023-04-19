@@ -9,8 +9,8 @@ class Consumer(models.Model):
 class Product(models.Model):
     role = models.CharField(max_length=20, null=True)
     name_brand = models.CharField(max_length=200, null=True)
-    inductry_code = models.CharField(max_length=20, null=True)
-    inductry_name = models.CharField(max_length=200, null=True)
+    industry_code = models.CharField(max_length=20, null=True)  
+    industry_name = models.CharField(max_length=200, null=True)
 
 class FoodAdverseEvent(models.Model):
     repot_number = models.CharField(max_length=20)

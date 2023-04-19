@@ -30,44 +30,50 @@
 
 
     <table> 
-            <thead>
+        <thead>
+            <tr>
+                <th>Report Number</th>
+                <th>Date Created</th>
+                <th>Date Started</th>
+                <th>Outcome</th>
+                <th>Reactions</th>
+                <th>Consumer</th>
+                <th>Products</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if events %}
+            {% for event in events %}
                 <tr>
-                    <th>Report Number</th>
-                    <th>Date Created</th>
-                    <th>Date Started</th>
-                    <th>Outcome</th>
-                    <th>Reactions</th>
-                    <th>Consumer</th>
-                    <th>Products</th>
+                    <td>{{ event.report_number }}</td>
+                    <td>{{ event.date_created }}</td>
+                    <td>{{ event.date_started }}</td>
+                    <td>{{ event.outcomes|join:", " }}</td>
+                    <td>{{ event.reactions|join:", " }}</td>
+                    <td>
+                        Age: {{ event.consumer.age }} {{ event.consumer.age_unit }}<br>
+                        Gender: {{ event.consumer.gender }}
+                    </td>
+                    <td>
+                        <ul>
+                            {% for product in event.products %}
+                                <li>
+                                    Role: {{ product.role }}<br>
+                                    Name/Brand: {{ product.name_brand }}<br>
+                                    Industry Code: {{ product.industry_code }}<br>
+                                    Industry Name: {{ product.industry_name }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                {% for event in events %}
-                    <tr>
-                        <td>{{ event.repot_number }}</td>
-                        <td>{{ event.date_created }}</td>
-                        <td>{{ event.date_started }}</td>
-                        <td>{{ event.outcome }}</td>
-                        <td>{{ event.reactions }}</td>
-                        <td>
-                            Age: {{ event.consumer.age }} {{ event.consumer.age_unit }}<br>
-                            Gender: {{ event.consumer.gender }}
-                        </td>
-                        <td>
-                            <ul>
-                                {% for product in event.products.all %}
-                                    <li>
-                                        Role: {{ product.role }}<br>
-                                        Name/Brand: {{ product.name_brand }}<br>
-                                        Industry Code: {{ product.inductry_code }}<br>
-                                        Industry Name: {{ product.inductry_name }}
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
+            {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center;">No results found. Please try a different search.</td>
+                </tr>
+            {% endif %}
+        </tbody>
     </table>
 
     
