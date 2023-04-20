@@ -32,4 +32,4 @@ def load_events_from_json(file_path):
             ProductEvent.objects.create(product=product, adverse_event=event)
 
 if __name__ == '__main__':
-    load_events_from_json('../data.json')
+    load_events_from_json('./data.json')

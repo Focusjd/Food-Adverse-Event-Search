@@ -38,18 +38,23 @@
 </head>
 
 <body>
-    <h1>Line Charts</h1>
+    <h1>Food Adverse Events Report Statistics</h1>
     <a href="/">Back to home</a>
+    <p>This page presents three line charts that illustrate the distribution of adverse event reports over time. The charts display the number of reports by year, month, and day, providing an overview of trends and patterns in the data.</p>
+    <p>This page uses all the data in the local database, a total of <b style="color:red;">{{ data_number }}</b> results (this number will continue to grow as more data is added to the local database every time you search via api).</p>
     <div>
-        <h3>Adverse event reports by year</h3>
+        <h3>Line Chart by year</h3>
+        <p>This line chart shows the total number of adverse event reports for each year in the dataset. The x-axis represents the years, while the y-axis indicates the number of reports. By examining the chart, you can observe the annual trends in adverse event reporting and identify any significant changes or patterns over the years.</p>
         {{ year_chart|safe }}
     </div>
     <div>
-        <h3>Adverse event reports by month</h3>
+        <h3>Line Chart by month</h3>
+        <p>This line chart presents the total number of adverse event reports for each month, aggregated across all years in the dataset. The x-axis represents the months, labeled with their names (January, February, etc.), while the y-axis shows the number of reports. This chart helps you identify any seasonality in adverse event reporting or detect specific months that may have higher or lower reporting rates.</p>
         {{ month_chart|safe }}
     </div>
     <div>
-        <h3>Adverse event reports by day</h3>
+        <h3>Line Chart by day</h3>
+        <p>This line chart displays the total number of adverse event reports for each day of the month, aggregated across all months and years in the dataset. The x-axis represents the days (1-31), and the y-axis indicates the number of reports. By examining this chart, you can explore daily patterns in adverse event reporting and identify any specific days that may experience higher or lower reporting rates.</p>
         {{ day_chart|safe }}
     </div>
 </body>

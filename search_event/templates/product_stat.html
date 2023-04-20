@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <title>Tree Structure</title>
+    <title>Food Adverse Events Product Statistics</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -39,34 +39,47 @@
 </head>
 
 <body>
-    <h1>Tree Structure of Products</h1>
+    <h1>Food Adverse Events Product Statistics</h1>
     <a href="/">Back to home</a>
+    <p>This interactive visualization provides a comprehensive overview of the relationships between various products involved in food adverse events, their industries, and their roles. Using a sunburst chart, you can easily explore and understand the hierarchical structure of the products based on their industry codes, roles, and names.</p>
+    <p>
+        The chart is organized into three levels: the innermost ring represents the industry codes and their corresponding industry names, the middle ring represents the product roles (e.g., suspect, concomitant), and the outermost ring contains the individual products with their names or brand information. To explore the chart, simply hover over any segment to see more details about the products, roles, or industries.
+    </p>
+    <p>
+        This page is designed to help you gain insights into the distribution of products associated with food adverse events across different industries and roles, as well as to identify trends or patterns in the data. We hope this visualization helps you better understand the product landscape in the context of food adverse events and supports your decision-making process.</p>
+
+    <h2>Product Statistics Sunburst Chart</h2>
+    <p>You can use this diagram to dynamically explore the product tree.</p>
     <div id="plot-container">
         {{ plot_div|safe }}
     </div>
-    <ul>
-        {% for industry_code, industry_data in tree_structure.items %}
-            <li>
-                <h2>{{ industry_code }} - {{ industry_data.name }}</h2>
-                <ul>
-                    {% for role, products in industry_data.roles.items %}
-                        <li>
-                            <h3> {{ role }}</h3>
-                            <ul>
-                                {% for product in products %}
-                                    <li>
-                                        <!-- ID: {{ product.id }}<br> -->
-                                        <!-- Name/Brand: {{ product.name_brand }} -->
-                                        {{ product.name_brand }}
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </li>
-        {% endfor %}
-    </ul>
+    <h2>Product Statistics Tree</h2>
+    <p>The following is the presentation of the Product Tree, which is a tree structure built independently from all the product data. Its data comes from the local database, and since a large amount of data is not conducive to a clear presentation of the content, the first 150 pieces of data will be extracted.</p>
+
+    <div style="height: 1000px; overflow-y: scroll;">
+        <ul>
+            {% for industry_code, industry_data in tree_structure.items %}
+                <li>
+                    <h3>{{ industry_code }} - {{ industry_data.name }}</h2>
+                    <ul>
+                        {% for role, products in industry_data.roles.items %}
+                            <li>
+                                <h4> {{ role }}</h3>
+                                <ul>
+                                    {% for product in products %}
+                                        <li>
+                                            {{ product.name_brand }}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {

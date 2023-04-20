@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from django.http import HttpResponse
 
 from .models import *
 from .forms import SearchForm
@@ -7,7 +6,6 @@ import requests
 import json
 import hashlib
 import os
-import threading
 
 from collections import defaultdict
 from datetime import datetime
@@ -15,9 +13,8 @@ from datetime import datetime
 import plotly.express as px
 import plotly.io as pio
 
-
+from random import sample
 from django.shortcuts import render
-from django.db.models import Count
 import plotly.express as px
 import plotly.io as pio
 from .models import FoodAdverseEvent
@@ -29,14 +26,13 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 from plotly.offline import plot
 
-
 CACHE_FILE = 'search_cache.json'
 
 
-def build_tree_structure():
+def build_tree_structure(products):
     tree = []
 
-    products = Product.objects.all()
+
     for product in products:
         industry_code = product.industry_code
         industry_name = product.industry_name
@@ -64,36 +60,9 @@ def build_tree_structure():
 
     return tree
 
-
-def tree_structure_plotly_view(request):
-    tree_structure = build_tree_structure()
-
-    fig = make_subplots(1, 1, specs=[[{'type': 'sunburst'}]])
-
-    fig.add_trace(go.Sunburst(
-        ids=[item['id'] for item in tree_structure],
-        labels=[item['label'] for item in tree_structure],
-        parents=[item['parent'] for item in tree_structure],
-        hovertext=[item['label'] for item in tree_structure],
-        hoverinfo="text",
-        insidetextorientation='radial'
-    ))
-
-    fig.update_layout(title_text='Tree Structure of Products', title_x=0.5, height=1000, width=1000)
-
-    plot_div = plot(fig, output_type='div', include_plotlyjs=False)
-
-    context = {
-        'plot_div': plot_div,
-    }
-
-    return render(request, 'tree_structure_plotly.html', context)
-
-
-def build_tree_list():
+def build_tree_list(products):
     tree = {}
 
-    products = Product.objects.all()
     for product in products:
         industry_code = product.industry_code
         industry_name = product.industry_name
@@ -113,19 +82,13 @@ def build_tree_list():
             'name_brand': product.name_brand
         })
 
+    with open('product_tree.json', 'w') as json_file:
+        json.dump(tree, json_file)
+
     return tree
 
 
-def tree_structure_view(request):
-    tree_structure = build_tree_list()
-    context = {
-        'tree_structure': tree_structure,
-    }
-    return render(request, 'tree_structure.html', context)
-
-def product_stats_view(request):
-    tree_list = build_tree_list()
-    tree_structure = build_tree_structure()
+def build_sunburst_data(tree_structure):
     fig = make_subplots(1, 1, specs=[[{'type': 'sunburst'}]])
 
     fig.add_trace(go.Sunburst(
@@ -140,6 +103,14 @@ def product_stats_view(request):
     fig.update_layout(title_text='Tree Structure of Products', title_x=0.5, height=1000, width=1000)
 
     plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+    return plot_div
+
+def product_stats_view(request):
+    products = Product.objects.all()[:150]
+
+    tree_list = build_tree_list(products)
+    tree_structure = build_tree_structure(products)
+    plot_div = build_sunburst_data(tree_structure)
 
     context = {
         'tree_structure': tree_list,
@@ -179,47 +150,15 @@ def line_charts(request):
     year_chart_html = pio.to_html(fig_year, full_html=False)
     month_chart_html = pio.to_html(fig_month, full_html=False)
     day_chart_html = pio.to_html(fig_day, full_html=False)
-
+    data_number = len(events)
     context = {
         'year_chart': year_chart_html,
         'month_chart': month_chart_html,
         'day_chart': day_chart_html,
+        'data_number': data_number,
     }
 
     return render(request, 'line_charts.html', context)
-
-
-
-
-def results(request):
-    events = FoodAdverseEvent.objects.all()
-    context = {'events': events}
-    return render(request, 'event_results.html', context)
-
-def search(request):
-    form = SearchForm(request.GET or None)
-    events = FoodAdverseEvent.objects.all()
-
-    if form.is_valid():
-        gender = form.cleaned_data['gender']
-        age = form.cleaned_data['age']
-        reactions = form.cleaned_data['reactions']
-
-        if gender:
-            events = events.filter(consumer__gender=gender)
-        if age:
-            events = events.filter(consumer__age=age)
-        if reactions:
-            reactions_list = reactions.split(',')
-            events = events.filter(reactions__icontains=reactions_list[0])
-            for reaction in reactions_list[1:]:
-                events = events.filter(reactions__icontains=reaction.strip())
-
-    context = {
-        'form': form,
-        'events': events,
-    }
-    return render(request, 'search.html', context)
 
 
 def index(request):

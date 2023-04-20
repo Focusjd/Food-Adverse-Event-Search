@@ -79,22 +79,26 @@
     <header>
         <h1>Welcome to the Food Adverse Events Search</h1>
         <p>
-            This website allows you to search for reported adverse events related to food products. You can use our search form to find events based on criteria such as gender, age, product name, and reactions.
+            This website allows you to search for reported adverse events related to food products. You can use our search form to find events based on criteria such as gender, age, product name, and reactions. Also you can analyze the statistics of the adverse events and products.
         </p>
     </header>
+    <h2>Food Adverse Events Statistics</h2>
+    <p>Below is a link to Food Adverse Events Statistics, where they analyze trends and rates using data from a local database. The data will become more representative as the number of searches increases. A tree structure of the product statistics is also provided in the second link.</p>
+    <a href="/charts" style="display: inline-block; margin-bottom: 1rem;">Food Adverse Events Report Statistics</a><br />
+    <a href="/product-stat" style="display: inline-block; margin-bottom: 1rem;">Adverse Products Statistics</a><br />
 
+
+    <h2>Food Adverse Events Search</h2>
     <section>
-        <h2>User Guide</h2>
+        <h3>User Guide</h3>
         <ol>
             <li>Enter your desired search criteria in the search boxes provided. You may leave a search box empty if you don't want to apply any filters for that specific field.</li>
             <li>Click the "Search" button to submit your query and view the results.</li>
             <li>If you'd like to start a new search, click the "Clear" button to reset the search form and remove any previous search results.</li>
         </ol>
-    </section>
+        <b>Note:</b> You can use blanks in the text box to match all results.<br />
+    </section><br /><br />
 
-    <h1>Food Adverse Events Search</h1>
-    <a href="/charts" style="display: inline-block; margin-bottom: 1rem;">Food Adverse Events Report Statistics</a><br />
-    <a href="/product-stat" style="display: inline-block; margin-bottom: 1rem;">Adverse Products Statistics</a><br />
     <form method="get" action="" class="search-form">
         <div>
             <label for="{{ form.gender.auto_id }}">Gender:</label>
@@ -112,68 +116,71 @@
             <label for="{{ form.reactions.auto_id }}">Reactions:</label>
             {{ form.reactions }}
         </div>
+        
         <div class="form-actions">
             <button type="submit">Search</button>
             <button type="button" onclick="clearSearch()">Clear</button>
         </div>
     </form>
 
-    <table>
-        <colgroup>
-            <col style="width: 10%;">
-            <col style="width: 10%;">
-            <col style="width: 10%;">
-            <col style="width: 12%;">
-            <col style="width: 12%;">
-            <col style="width: 12%;">
-            <col style="width: 34%;">
-        </colgroup>
-        <thead>
-            <tr>
-                <th>Report Number</th>
-                <th>Date Created</th>
-                <th>Date Started</th>
-                <th>Outcome</th>
-                <th>Reactions</th>
-                <th>Consumer</th>
-                <th>Products</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% if events %}
-            {% for event in events %}
+    <div style="height: 800px; overflow-y: scroll;">
+        <table>
+            <colgroup>
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 12%;">
+                <col style="width: 12%;">
+                <col style="width: 12%;">
+                <col style="width: 34%;">
+            </colgroup>
+            <thead>
                 <tr>
-                    <td>{{ event.report_number }}</td>
-                    <td>{{ event.date_created }}</td>
-                    <td>{{ event.date_started }}</td>
-                    <td>{{ event.outcomes|join:", " }}</td>
-                    <td>{{ event.reactions|join:", " }}</td>
-                    <td>
-                        <b>Age:</b> {{ event.consumer.age }} {{ event.consumer.age_unit }}<br>
-                        <b>Gender:</b> {{ event.consumer.gender }}
-                    </td>
-                    <td>
-                        <ul id="products-list">
-                            {% for product in event.products %}
-                                <li class="product-item">
-                                    <b>Role: </b>{{ product.role }}<br>
-                                    <b>Name/Brand:</b> {{ product.name_brand }}<br>
-                                    <b>Industry Code:</b> {{ product.industry_code }}<br>
-                                    <b>Industry Name:</b> {{ product.industry_name }}
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </td>
+                    <th>Report Number</th>
+                    <th>Date Created</th>
+                    <th>Date Started</th>
+                    <th>Outcome</th>
+                    <th>Reactions</th>
+                    <th>Consumer</th>
+                    <th>Products</th>
                 </tr>
-            {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="7" style="text-align: center;">No results found. Please try a different search.</td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
-    
+            </thead>
+            <tbody>
+                {% if events %}
+                {% for event in events %}
+                    <tr>
+                        <td>{{ event.report_number }}</td>
+                        <td>{{ event.date_created }}</td>
+                        <td>{{ event.date_started }}</td>
+                        <td>{{ event.outcomes|join:", " }}</td>
+                        <td>{{ event.reactions|join:", " }}</td>
+                        <td>
+                            <i>Age:</i> {{ event.consumer.age }} {{ event.consumer.age_unit }}<br>
+                            <i>Gender:</i> {{ event.consumer.gender }}
+                        </td>
+                        <td>
+                            <ul id="products-list">
+                                {% for product in event.products %}
+                                    <li class="product-item">
+                                        <i>Role: </i>{{ product.role }}<br>
+                                        <i>Name/Brand:</i> {{ product.name_brand }}<br>
+                                        <i>Industry Code:</i> {{ product.industry_code }}<br>
+                                        <i>Industry Name:</i> {{ product.industry_name }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align: center;">No results found. Please try a different search.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const events = document.querySelectorAll('tbody tr');
