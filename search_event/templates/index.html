@@ -8,7 +8,62 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food Adverse Events</title>
-    <!-- <link rel="stylesheet" href="{% static 'css/style.css' %}"> -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 2rem;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+        .search-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-gap: 40px; /*the gap between search boxes */
+        margin-bottom: 1rem;
+        }
+        .search-form label {
+            display: block;
+            font-weight: bold;
+        }
+        .search-form input,
+        .search-form select {
+            width: 100%;
+            padding: 5px;
+        }
+        .search-form .form-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .search-form button {
+            margin-left: 10px;
+        }
+    </style>
     <script>
         function clearSearch() {
             const form = document.querySelector('form');
@@ -21,15 +76,58 @@
 </head>
 
 <body>
+    <header>
+        <h1>Welcome to the Food Adverse Events Search</h1>
+        <p>
+            This website allows you to search for reported adverse events related to food products. You can use our search form to find events based on criteria such as gender, age, product name, and reactions.
+        </p>
+    </header>
+
+    <section>
+        <h2>User Guide</h2>
+        <ol>
+            <li>Enter your desired search criteria in the search boxes provided. You may leave a search box empty if you don't want to apply any filters for that specific field.</li>
+            <li>Click the "Search" button to submit your query and view the results.</li>
+            <li>If you'd like to start a new search, click the "Clear" button to reset the search form and remove any previous search results.</li>
+        </ol>
+    </section>
+
     <h1>Food Adverse Events Search</h1>
-    <form method="get" action="">
-        {{ form.as_p }}
-        <button type="submit">Search</button>
-        <button type="button" onclick="clearSearch()">Clear</button>
+    <a href="/charts" style="display: inline-block; margin-bottom: 1rem;">Food Adverse Events Report Statistics</a><br />
+    <a href="/product-stat" style="display: inline-block; margin-bottom: 1rem;">Adverse Products Statistics</a><br />
+    <form method="get" action="" class="search-form">
+        <div>
+            <label for="{{ form.gender.auto_id }}">Gender:</label>
+            {{ form.gender }}
+        </div>
+        <div>
+            <label for="{{ form.age.auto_id }}">Age:</label>
+            {{ form.age }}
+        </div>
+        <div>
+            <label for="{{ form.product_name.auto_id }}">Product Name:</label>
+            {{ form.product_name }}
+        </div>
+        <div>
+            <label for="{{ form.reactions.auto_id }}">Reactions:</label>
+            {{ form.reactions }}
+        </div>
+        <div class="form-actions">
+            <button type="submit">Search</button>
+            <button type="button" onclick="clearSearch()">Clear</button>
+        </div>
     </form>
 
-
-    <table> 
+    <table>
+        <colgroup>
+            <col style="width: 10%;">
+            <col style="width: 10%;">
+            <col style="width: 10%;">
+            <col style="width: 12%;">
+            <col style="width: 12%;">
+            <col style="width: 12%;">
+            <col style="width: 34%;">
+        </colgroup>
         <thead>
             <tr>
                 <th>Report Number</th>
@@ -51,17 +149,17 @@
                     <td>{{ event.outcomes|join:", " }}</td>
                     <td>{{ event.reactions|join:", " }}</td>
                     <td>
-                        Age: {{ event.consumer.age }} {{ event.consumer.age_unit }}<br>
-                        Gender: {{ event.consumer.gender }}
+                        <b>Age:</b> {{ event.consumer.age }} {{ event.consumer.age_unit }}<br>
+                        <b>Gender:</b> {{ event.consumer.gender }}
                     </td>
                     <td>
-                        <ul>
+                        <ul id="products-list">
                             {% for product in event.products %}
-                                <li>
-                                    Role: {{ product.role }}<br>
-                                    Name/Brand: {{ product.name_brand }}<br>
-                                    Industry Code: {{ product.industry_code }}<br>
-                                    Industry Name: {{ product.industry_name }}
+                                <li class="product-item">
+                                    <b>Role: </b>{{ product.role }}<br>
+                                    <b>Name/Brand:</b> {{ product.name_brand }}<br>
+                                    <b>Industry Code:</b> {{ product.industry_code }}<br>
+                                    <b>Industry Name:</b> {{ product.industry_name }}
                                 </li>
                             {% endfor %}
                         </ul>
@@ -75,7 +173,22 @@
             {% endif %}
         </tbody>
     </table>
-
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const events = document.querySelectorAll('tbody tr');
+            events.forEach((event) => {
+                const productItems = event.querySelectorAll('.product-item');
+                productItems.forEach((item, index) => {
+                    if (index !== productItems.length - 1) {
+                        item.style.borderBottom = '1px solid #ccc';
+                    }
+                    item.style.paddingBottom = '5px';
+                    item.style.marginBottom = '5px';
+                });
+            });
+        });
+    </script>
     
 </body>
 

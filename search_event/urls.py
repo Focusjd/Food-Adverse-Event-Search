@@ -3,6 +3,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('product-stat/', views.product_stats_view, name='product_stats_view'),
     path('tree/', views.tree_structure_view, name='tree_structure'),
     path('tree-plotly/', views.tree_structure_plotly_view, name='tree_plotly'),
     path('', views.index, name='index'),

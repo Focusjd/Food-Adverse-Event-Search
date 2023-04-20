@@ -30,8 +30,6 @@ import plotly.graph_objects as go
 from plotly.offline import plot
 
 
-# url:f"https://api.fda.gov/food/event.json?search=reactions:{reactions}+AND+consumer.gender:{gender}+AND+consumer.age:{age}+AND+products.name_brand:{brand}.&limit=10"
-
 CACHE_FILE = 'search_cache.json'
 
 
@@ -125,7 +123,29 @@ def tree_structure_view(request):
     }
     return render(request, 'tree_structure.html', context)
 
+def product_stats_view(request):
+    tree_list = build_tree_list()
+    tree_structure = build_tree_structure()
+    fig = make_subplots(1, 1, specs=[[{'type': 'sunburst'}]])
 
+    fig.add_trace(go.Sunburst(
+        ids=[item['id'] for item in tree_structure],
+        labels=[item['label'] for item in tree_structure],
+        parents=[item['parent'] for item in tree_structure],
+        hovertext=[item['label'] for item in tree_structure],
+        hoverinfo="text",
+        insidetextorientation='radial'
+    ))
+
+    fig.update_layout(title_text='Tree Structure of Products', title_x=0.5, height=1000, width=1000)
+
+    plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+
+    context = {
+        'tree_structure': tree_list,
+        'plot_div': plot_div,
+    }
+    return render(request, 'product_stat.html', context)
 
 def line_charts(request):
     # Get data from the database
@@ -138,13 +158,17 @@ def line_charts(request):
         date_str = event.date_created
         date = datetime.strptime(date_str, '%Y%m%d')  # Updated format string
         data['year'][date.year] += 1
-        data['month'][date.replace(day=1)] += 1
-        data['day'][date] += 1
+        data['month'][date.month] += 1
+        data['day'][date.day] += 1
 
     # Convert dictionaries to DataFrames
     df_year = pd.DataFrame(list(data['year'].items()), columns=['year', 'count']).sort_values('year')
     df_month = pd.DataFrame(list(data['month'].items()), columns=['month', 'count']).sort_values('month')
     df_day = pd.DataFrame(list(data['day'].items()), columns=['day', 'count']).sort_values('day')
+
+    # Map month numbers to month names
+    month_names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    df_month['month'] = df_month['month'].apply(lambda x: month_names[x-1])
 
     # Create Plotly figures
     fig_year = px.line(df_year, x='year', y='count', title='Adverse event reports by year')
@@ -163,6 +187,7 @@ def line_charts(request):
     }
 
     return render(request, 'line_charts.html', context)
+
 
 
 
