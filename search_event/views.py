@@ -1,5 +1,4 @@
 from django.shortcuts import render
-
 from .models import *
 from .forms import SearchForm
 import requests
@@ -31,13 +30,10 @@ CACHE_FILE = 'search_cache.json'
 
 def build_tree_structure(products):
     tree = []
-
-
     for product in products:
         industry_code = product.industry_code
         industry_name = product.industry_name
         role = product.role
-
         tree.append({
             'id': f'{industry_code}-{role}-{product.id}',
             'parent': f'{industry_code}-{role}' if role else industry_code,
@@ -57,7 +53,6 @@ def build_tree_structure(products):
                 'parent': '',
                 'label': f'{industry_code} - {industry_name}'
             })
-
     return tree
 
 def build_tree_list(products):
@@ -237,6 +232,7 @@ def load_from_cache(query):
 
 def search_api(query, timeout=2):
     api_url = f'https://api.fda.gov/food/event.json?sort=date_started:desc&search={query}&limit=15'
+    data = None
     try:
         response = requests.get(api_url, timeout=timeout)
         if response.status_code == 200:
