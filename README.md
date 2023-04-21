@@ -114,4 +114,4 @@ Since the adverse reactions for each product are independently included in each 
 
 ## Demo:
 
-![demo](.\demo\demo.gif)
+![image](https://github.com/Focusjd/Food-Adverse-Event-Search/blob/master/demo/demo.gif)
