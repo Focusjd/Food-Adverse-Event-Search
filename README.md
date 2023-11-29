@@ -1,7 +1,5 @@
 # Welcome to the Food Adverse Events Search
 
-**This project is build for SI 507 2023 final project**
-
 This website allows you to search for reported adverse events related to food products. You can use our search form to find events based on criteria such as gender, age, product name, and reactions. Also you can analyze the statistics of the adverse events and products.
 
 ## How to Run
